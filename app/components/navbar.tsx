@@ -27,14 +27,14 @@ const Navbar = () => {
         </Title>
 
         <Button
-          onClick={() => navigate("/create")}
+          onClick={() => navigate("/")}
           radius="xl"
           size="sm"
           variant="white"
           color="blue"
           fw={500}
         >
-          Create
+          New
         </Button>
       </Flex>
     </Box>

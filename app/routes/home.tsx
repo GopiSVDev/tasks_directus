@@ -1,5 +1,7 @@
 import Navbar from "~/components/navbar";
 import type { Route } from "../+types/root";
+import TaskList from "~/components/taskList";
+import type { Task } from "~/types/task";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,9 +11,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return (
-    <main id="wrapper">
-      <Navbar />
-    </main>
-  );
+  const tasks: Task[] = [];
+
+  return <TaskList tasks={tasks} />;
 }
