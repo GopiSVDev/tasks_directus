@@ -10,9 +10,9 @@ const statusColors: Record<Task["status"], string> = {
 };
 
 const TaskItem = ({ task }: { task: Task }) => {
-  const { id, title, description, createdAt, status, dueAt } = task;
+  const { id, title, description, date_created, status, dueAt } = task;
 
-  const createdDate = formatDate(createdAt);
+  const createdDate = formatDate(date_created);
   const dueDate = formatDate(dueAt);
 
   return (

@@ -2,9 +2,9 @@ import { Stack, Text, Paper } from "@mantine/core";
 import TaskItem from "./taskItem";
 import type { Task } from "~/types/task";
 
-const TaskList = ({ tasks }: { tasks: Task[] }) => {
+const TaskList = ({ tasks }: { tasks: Task[] | [] }) => {
   return (
-    <Stack gap="lg" align="center" w="100%">
+    <Stack gap="lg" align="center" w="100%" my="md">
       {tasks.length === 0 ? (
         <Paper
           withBorder

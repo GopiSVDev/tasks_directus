@@ -1,7 +1,6 @@
-import Navbar from "~/components/navbar";
+import { fetchTasks } from "~/.server/tasks";
 import type { Route } from "../+types/root";
 import TaskList from "~/components/taskList";
-import type { Task } from "~/types/task";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,8 +9,17 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  const tasks: Task[] = [];
+export async function loader({ request }: Route.LoaderArgs) {
+  try {
+    const tasks = await fetchTasks(request);
+    return tasks;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export default function Home({ loaderData }: Route.ComponentProps) {
+  const tasks = loaderData ?? [];
 
   return <TaskList tasks={tasks} />;
 }
