@@ -20,24 +20,24 @@ const { getSession, commitSession, destroySession } =
       path: "/",
       sameSite: "lax",
       secrets: ["s3cret1"], // only for learning purpose
-      secure: true,
+      secure: false,
     },
   });
 
 async function getUserSession(request: Request) {
   const session = await getSession(request.headers.get("Cookie"));
+  const accessToken = session.get("accessToken");
 
-  const accessToken = session.get("accessToken") as string | undefined;
-  const refreshToken = session.get("refreshToken") as string | undefined;
-  const expiresAt = session.get("expiresAt") as number | undefined;
-
-  let headers: Record<string, string> | undefined;
-
-  if (!accessToken || !refreshToken) {
+  if (!accessToken) {
     return { session, loggedIn: false };
   }
 
-  if (!expiresAt || Date.now() > expiresAt) {
+  const refreshToken = session.get("refreshToken");
+  const expiresAt = session.get("expiresAt");
+
+  let headers: Record<string, string> | undefined;
+
+  if (refreshToken && (!expiresAt || Date.now() > expiresAt)) {
     try {
       const refreshed = await authClient.refresh({
         refresh_token: refreshToken,

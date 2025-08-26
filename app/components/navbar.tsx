@@ -1,8 +1,10 @@
-import { useNavigate } from "react-router";
-import { Button, Title, Flex, Box } from "@mantine/core";
+import { Link, useLoaderData } from "react-router";
+import { Button, Title, Flex, Box, Group } from "@mantine/core";
 
 const Navbar = () => {
-  const navigate = useNavigate();
+  const { loggedIn } = useLoaderData();
+
+  console.log(loggedIn);
 
   return (
     <Box
@@ -17,25 +19,71 @@ const Navbar = () => {
       }}
     >
       <Flex align="center" justify="space-between" gap="md">
-        <Title
-          order={3}
-          c="white"
-          style={{ cursor: "pointer", letterSpacing: "-0.5px" }}
-          onClick={() => navigate("/")}
-        >
-          Tasks<span style={{ fontWeight: 300 }}>App</span>
-        </Title>
+        <Link to="/">
+          <Title
+            order={3}
+            c="white"
+            style={{ cursor: "pointer", letterSpacing: "-0.5px" }}
+          >
+            Tasks<span style={{ fontWeight: 300 }}>App</span>
+          </Title>
+        </Link>
 
-        <Button
-          onClick={() => navigate("/")}
-          radius="xl"
-          size="sm"
-          variant="white"
-          color="blue"
-          fw={500}
-        >
-          New
-        </Button>
+        <Group gap="sm">
+          {loggedIn ? (
+            <>
+              <Link to="/create">
+                <Button
+                  radius="xl"
+                  size="sm"
+                  variant="white"
+                  color="blue"
+                  fw={500}
+                >
+                  New
+                </Button>
+              </Link>
+
+              <Link to="/logout">
+                <Button
+                  radius="xl"
+                  size="sm"
+                  variant="outline"
+                  color="white"
+                  fw={500}
+                >
+                  Logout
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button
+                  radius="xl"
+                  size="sm"
+                  variant="white"
+                  color="blue"
+                  fw={500}
+                >
+                  Login
+                </Button>
+              </Link>
+
+              <Link to="/register">
+                <Button
+                  radius="xl"
+                  size="sm"
+                  variant="outline"
+                  color="white"
+                  fw={500}
+                >
+                  Register
+                </Button>
+              </Link>
+            </>
+          )}
+        </Group>
       </Flex>
     </Box>
   );
