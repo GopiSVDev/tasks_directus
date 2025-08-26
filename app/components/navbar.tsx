@@ -4,8 +4,6 @@ import { Button, Title, Flex, Box, Group } from "@mantine/core";
 const Navbar = () => {
   const { loggedIn } = useLoaderData();
 
-  console.log(loggedIn);
-
   return (
     <Box
       component="header"

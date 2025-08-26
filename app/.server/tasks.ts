@@ -1,5 +1,5 @@
-import { client } from "./directus";
-import { readItems, withToken } from "@directus/sdk";
+import { authClient } from "./directus";
+import { readItems, readMe, withToken } from "@directus/sdk";
 import { getUserSession } from "./session";
 
 export async function fetchTasks(request: Request) {
@@ -8,5 +8,13 @@ export async function fetchTasks(request: Request) {
 
   if (!loggedIn || !accessToken) throw new Error("Not logged in");
 
-  return client.request(withToken(accessToken, readItems("tasks")));
+  authClient.setToken(accessToken);
+
+  const currentUser = await authClient.request(readMe());
+
+  return authClient.request(
+    readItems("tasks", {
+      filter: { userId: { _eq: currentUser.id } },
+    })
+  );
 }

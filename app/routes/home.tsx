@@ -12,6 +12,7 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   try {
     const tasks = await fetchTasks(request);
+
     return tasks;
   } catch (error) {
     console.log(error);

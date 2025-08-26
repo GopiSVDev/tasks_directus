@@ -1,6 +1,7 @@
 import { destroySession, getSession } from "~/.server/session";
 import type { Route } from "../+types/root";
 import { Form, Link, redirect } from "react-router";
+import { Box, Button, Stack, Text, Title } from "@mantine/core";
 
 export async function action({ request }: Route.ActionArgs) {
   const session = await getSession(request.headers.get("Cookie"));
@@ -13,12 +14,42 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function LogoutRoute() {
   return (
-    <>
-      <p>Are you sure you want to log out?</p>
-      <Form method="post">
-        <button>Logout</button>
-      </Form>
-      <Link to="/">Never mind</Link>
-    </>
+    <Box
+      mx="auto"
+      my="xl"
+      px="md"
+      py="xl"
+      style={{
+        maxWidth: 400,
+        border: "1px solid #e0e0e0",
+        borderRadius: 8,
+        backgroundColor: "#fff",
+        textAlign: "center",
+      }}
+    >
+      <Title order={3} mb="md">
+        Logout
+      </Title>
+
+      <Text mb="lg">Are you sure you want to log out?</Text>
+
+      <Stack gap="sm">
+        <Form method="post">
+          <Button type="submit" color="red" fullWidth>
+            Logout
+          </Button>
+        </Form>
+
+        <Button
+          component={Link}
+          to="/"
+          variant="outline"
+          color="gray"
+          fullWidth
+        >
+          Never mind
+        </Button>
+      </Stack>
+    </Box>
   );
 }
