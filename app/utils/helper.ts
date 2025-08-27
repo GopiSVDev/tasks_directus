@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export function formatDate(date?: string | Date): string {
   if (!date) return "";
 
@@ -14,7 +16,6 @@ export function formatDate(date?: string | Date): string {
   return `${day}/${month}/${year}`;
 }
 
-export function formatDateForInput(date: Date) {
-  const d = typeof date === "string" ? new Date(date) : date;
-  return d.toISOString().slice(0, 10);
+export function formatDateForInput(dateString: string | Date): string {
+  return dayjs(dateString).format("YYYY-MM-DDTHH:mm");
 }

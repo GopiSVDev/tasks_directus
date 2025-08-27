@@ -2,18 +2,18 @@ import { Form, Link } from "react-router";
 import { formatDate } from "~/utils/helper";
 import { Button, Card, Text, Group, Badge, Stack } from "@mantine/core";
 import { CheckCircle, Pencil, Trash, RotateCcw } from "lucide-react";
-import type { Task } from "~/types/task";
+import type { FullTask, Task } from "~/types/task";
 
 const statusColors: Record<Task["status"], string> = {
   pending: "orange",
   completed: "green",
 };
 
-const TaskItem = ({ task }: { task: Task }) => {
-  const { id, title, description, date_created, status, dueAt } = task;
+const TaskItem = ({ task }: { task: FullTask }) => {
+  const { id, title, description, date_created, status, dueDate } = task;
 
   const createdDate = formatDate(date_created);
-  const dueDate = formatDate(dueAt);
+  const dueDateFormatted = formatDate(dueDate);
 
   return (
     <Card
@@ -56,7 +56,7 @@ const TaskItem = ({ task }: { task: Task }) => {
 
         <Group gap="xl" c="dimmed" fz="sm">
           <Text>Created: {createdDate}</Text>
-          <Text>Due: {dueDate}</Text>
+          <Text>Due: {dueDateFormatted}</Text>
         </Group>
 
         <Group gap="sm" mt="sm">

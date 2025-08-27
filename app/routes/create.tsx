@@ -1,6 +1,9 @@
 import { redirect } from "react-router";
 import type { Route } from "../+types/root";
 import TaskForm from "~/components/taskForm";
+import type { Task } from "~/types/task";
+import { createTask } from "~/.server/tasks";
+import dayjs from "dayjs";
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -9,37 +12,23 @@ export async function action({ request }: Route.ActionArgs) {
   const dueDateRaw = formData.get("dueDate")?.toString();
 
   if (!title) return "Title is required";
-  if (!dueDateRaw) return "Due date is required";
 
-  const dueDate = new Date(dueDateRaw);
-  if (isNaN(dueDate.getTime())) {
-    return "Invalid Due Date";
-  }
+  const dueDate = dayjs(dueDateRaw).format("YYYY-MM-DDTHH:mm:ss");
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const due = new Date(dueDate);
-  due.setHours(0, 0, 0, 0);
-
-  if (due < today) {
-    return "Due date must be today or later";
-  }
-
-  const newTask = {
+  const newTask: Task = {
     title,
     description,
     status: "pending",
     dueDate,
   };
 
-  //   createTask(newTask);
+  await createTask(newTask);
 
   return redirect("/");
 }
 
-const newTask = ({ actionData }: Route.ComponentProps) => {
+const Create = ({ actionData }: Route.ComponentProps) => {
   return <TaskForm error={actionData as string | undefined} />;
 };
 
-export default newTask;
+export default Create;

@@ -1,4 +1,4 @@
-import { registerUser, isDirectusError } from "@directus/sdk";
+import { registerUser, isDirectusError, readItems } from "@directus/sdk";
 import type { AuthenticationData } from "@directus/sdk";
 import { authClient, client } from "~/.server/directus";
 
@@ -11,6 +11,19 @@ export const register = async (data: AuthData) => {
   const { email, password } = data;
 
   try {
+    const exisiting = await client.request(
+      readItems("directus_users", {
+        filter: { email: { _eq: email } },
+        limit: 1,
+      })
+    );
+
+    console.log(exisiting);
+
+    if (exisiting.length > 0) {
+      throw new Error("This email is already registered.");
+    }
+
     await client.request(registerUser(email, password));
   } catch (error) {
     if (isDirectusError(error)) {

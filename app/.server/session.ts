@@ -44,8 +44,8 @@ async function getUserSession(request: Request) {
       });
 
       session.set("accessToken", refreshed.access_token ?? "");
-      session.set("refreshToken", refreshed.refresh_token ?? "");
-      session.set("expiresAt", refreshed.expires_at ?? 0);
+      session.set("refreshToken", refreshed.refresh_token ?? refreshToken);
+      session.set("expiresAt", Date.now() + (refreshed.expires ?? 0));
     } catch {
       await destroySession(session);
       return {

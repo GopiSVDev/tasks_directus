@@ -59,9 +59,9 @@ const TaskForm = ({ task, error }: TaskFormProps) => {
 
           <TextInput
             label="Due Date"
-            name="dueAt"
-            type="date"
-            defaultValue={task ? formatDateForInput(task.dueAt) : ""}
+            name="dueDate"
+            type="datetime-local"
+            defaultValue={task ? formatDateForInput(task.dueDate) : ""}
             required
             min={formatDateForInput(new Date())}
           />

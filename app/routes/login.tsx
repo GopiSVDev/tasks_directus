@@ -31,11 +31,11 @@ export async function action({ request }: Route.ActionArgs) {
     const data: AuthenticationData = await login({ email, password });
     const session = await getSession(request.headers.get("Cookie"));
 
-    const { refresh_token, access_token, expires_at } = data;
+    const { refresh_token, access_token, expires } = data;
 
     session.set("accessToken", access_token ?? "");
     session.set("refreshToken", refresh_token ?? "");
-    session.set("expiresAt", expires_at ?? 0);
+    session.set("expiresAt", Date.now() + (expires ?? 0));
 
     return redirect("/", {
       headers: {
