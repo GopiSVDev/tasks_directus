@@ -1,4 +1,9 @@
-import { registerUser, isDirectusError, readItems } from "@directus/sdk";
+import {
+  registerUser,
+  isDirectusError,
+  login as directusLogin,
+  readUsers,
+} from "@directus/sdk";
 import type { AuthenticationData } from "@directus/sdk";
 import { authClient, client } from "~/.server/directus";
 
@@ -10,39 +15,23 @@ interface AuthData {
 export const register = async (data: AuthData) => {
   const { email, password } = data;
 
-  try {
-    const exisiting = await client.request(
-      readItems("directus_users", {
-        filter: { email: { _eq: email } },
-        limit: 1,
-      })
-    );
+  const items = await client.request(readUsers());
+  const alreadyExists = items.some((item) => item.email === email);
 
-    console.log(exisiting);
-
-    if (exisiting.length > 0) {
-      throw new Error("This email is already registered.");
-    }
-
-    await client.request(registerUser(email, password));
-  } catch (error) {
-    if (isDirectusError(error)) {
-      return error.errors?.[0]?.message || "Something went wrong with Directus";
-    }
-
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    return "Registration failed";
+  if (alreadyExists) {
+    throw new Error("Email already exists");
   }
+
+  await client.request(registerUser(email, password));
 };
 
 export const login = async (data: AuthData): Promise<AuthenticationData> => {
   const { email, password } = data;
 
+  authClient.setToken(null);
+
   try {
-    const res = await authClient.login({ email, password });
+    const res = await authClient.request(directusLogin({ email, password }));
     return res;
   } catch (error) {
     if (isDirectusError(error)) {

@@ -1,4 +1,4 @@
-import { Form, redirect } from "react-router";
+import { Form, redirect, useActionData } from "react-router";
 import type { Route } from "../+types/root";
 import { getUserSession } from "~/.server/session";
 import { register } from "~/.server/auth";
@@ -15,7 +15,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { loggedIn, headers } = await getUserSession(request);
 
   if (loggedIn) {
-    return redirect("/", headers);
+    return redirect("/", { headers });
   }
 
   return null;
@@ -31,11 +31,15 @@ export async function action({ request }: Route.ActionArgs) {
     await register({ email, password });
     return redirect("/login");
   } catch (error) {
-    console.log(error);
+    return {
+      error: error instanceof Error ? error.message : "Registration failed",
+    };
   }
 }
 
 const Register = () => {
+  const actionData = useActionData<{ error?: string }>();
+
   return (
     <Box
       mx="auto"
@@ -55,6 +59,18 @@ const Register = () => {
 
       <Form method="post">
         <Stack gap="md">
+          {actionData?.error && (
+            <Box
+              style={{
+                color: "red",
+                fontSize: 14,
+                textAlign: "center",
+              }}
+            >
+              {actionData.error}
+            </Box>
+          )}
+
           <TextInput
             label="Email"
             name="email"

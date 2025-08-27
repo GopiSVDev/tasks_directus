@@ -24,40 +24,59 @@ const { getSession, commitSession, destroySession } =
     },
   });
 
-async function getUserSession(request: Request) {
-  const session = await getSession(request.headers.get("Cookie"));
+async function refreshTokenIfNeeded(session: any) {
   const accessToken = session.get("accessToken");
-
-  if (!accessToken) {
-    return { session, loggedIn: false };
-  }
-
   const refreshToken = session.get("refreshToken");
   const expiresAt = session.get("expiresAt");
 
-  let headers: Record<string, string> | undefined;
+  const tokenExpired = !expiresAt || Date.now() > expiresAt - 5000;
 
-  if (refreshToken && (!expiresAt || Date.now() > expiresAt)) {
+  if (accessToken && refreshToken && tokenExpired) {
+    console.log("Token expired. Refreshing...");
+
     try {
       const refreshed = await authClient.refresh({
         refresh_token: refreshToken,
       });
 
-      session.set("accessToken", refreshed.access_token ?? "");
-      session.set("refreshToken", refreshed.refresh_token ?? refreshToken);
-      session.set("expiresAt", Date.now() + (refreshed.expires ?? 0));
-    } catch {
+      const newAccessToken = refreshed.access_token ?? "";
+      const newRefreshToken = refreshed.refresh_token ?? refreshToken;
+      const newExpiresAt = Date.now() + (refreshed.expires ?? 0);
+
+      session.set("accessToken", newAccessToken);
+      session.set("refreshToken", newRefreshToken);
+      session.set("expiresAt", newExpiresAt);
+
+      console.log("Token refreshed:", newAccessToken);
+
+      return { session, loggedIn: true };
+    } catch (error) {
+      console.log("Refresh failed. Logging out.");
+
       await destroySession(session);
-      return {
-        session,
-        loggedIn: false,
-        headers: { "Set-Cookie": await commitSession(session) },
-      };
+      return { session: null, loggedIn: false };
     }
   }
 
-  headers = { "Set-Cookie": await commitSession(session) };
-  return { session, loggedIn: true, headers };
+  return { session, loggedIn: !!accessToken };
+}
+
+async function getUserSession(request: Request) {
+  const session = await getSession(request.headers.get("Cookie"));
+
+  const { session: updatedSession, loggedIn } =
+    await refreshTokenIfNeeded(session);
+
+  const headers: HeadersInit = {};
+  if (updatedSession) {
+    headers["Set-Cookie"] = await commitSession(updatedSession);
+  }
+
+  return {
+    session: updatedSession,
+    loggedIn,
+    headers,
+  };
 }
 
 export { getSession, commitSession, destroySession, getUserSession };

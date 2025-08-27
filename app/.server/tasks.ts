@@ -6,16 +6,15 @@ import {
   readItems,
   readMe,
   updateItem,
-  withToken,
 } from "@directus/sdk";
 import { getUserSession } from "./session";
 import type { Task } from "~/types/task";
 
 export async function fetchTasks(request: Request) {
-  const { session, loggedIn } = await getUserSession(request);
+  const { session } = await getUserSession(request);
   const accessToken = session.get("accessToken");
 
-  if (!loggedIn || !accessToken) throw new Error("Not logged in");
+  if (!accessToken) throw new Error("Not logged in");
 
   authClient.setToken(accessToken);
 
