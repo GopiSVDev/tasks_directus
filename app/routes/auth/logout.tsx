@@ -1,7 +1,7 @@
 import { destroySession, getSession } from "~/.server/session";
-import type { Route } from "../+types/root";
 import { Form, Link, redirect } from "react-router";
 import { Box, Button, Stack, Text, Title } from "@mantine/core";
+import type { Route } from "../+types/home";
 
 export async function action({ request }: Route.ActionArgs) {
   const session = await getSession(request.headers.get("Cookie"));

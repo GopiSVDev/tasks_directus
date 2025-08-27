@@ -10,66 +10,75 @@ import {
 import { getUserSession } from "./session";
 import type { Task } from "~/types/task";
 
-export async function fetchTasks(request: Request) {
+async function getAccessToken(request: Request) {
   const { session } = await getUserSession(request);
-  const accessToken = session.get("accessToken");
+  if (!session) throw new Error("Not logged in");
 
+  const accessToken = session.get("accessToken");
   if (!accessToken) throw new Error("Not logged in");
 
   authClient.setToken(accessToken);
+  return accessToken;
+}
 
-  const currentUser = await authClient.request(readMe());
+async function getCurrentUser() {
+  try {
+    return await authClient.request(readMe());
+  } catch (err) {
+    throw new Error("Failed to fetch current user.");
+  }
+}
 
-  return authClient.request(
-    readItems("tasks", {
-      filter: { userId: { _eq: currentUser.id } },
-    })
-  );
+export async function fetchTasks(request: Request) {
+  await getAccessToken(request);
+
+  const currentUser = await getCurrentUser();
+  try {
+    return await authClient.request(
+      readItems("tasks", { filter: { userId: { _eq: currentUser.id } } })
+    );
+  } catch (err) {
+    console.error("Failed to fetch tasks", err);
+    throw new Error("An error occurred while fetching tasks.");
+  }
 }
 
 export async function getTaskById(id: number) {
   try {
-    const res = await authClient.request(readItem("tasks", id));
-    return res;
-  } catch (error) {
-    console.error(`Failed to fetch task with ID ${id}:`, error);
-
+    return await authClient.request(readItem("tasks", id));
+  } catch (err) {
+    console.error(`Failed to fetch task with ID ${id}`, err);
     throw new Error("An error occurred while fetching the task.");
   }
 }
 
 export async function createTask(task: Task) {
+  const currentUser = await getCurrentUser();
+
   try {
-    const currentUser = await authClient.request(readMe());
-
-    const taskWithUser = { ...task, userId: currentUser.id };
-
-    await authClient.request(createItem("tasks", taskWithUser));
-  } catch (error) {
-    console.error(`Failed to create task`, error);
-
+    await authClient.request(
+      createItem("tasks", { ...task, userId: currentUser.id })
+    );
+  } catch (err) {
+    console.error("Failed to create task", err);
     throw new Error("An error occurred while creating the task.");
   }
 }
 
-type TaskUpdate = Partial<Task>;
-
-export async function updateTask(id: number, updatedTask: TaskUpdate) {
+export async function updateTask(id: number, updatedTask: Partial<Task>) {
   try {
     await authClient.request(updateItem("tasks", id, updatedTask));
-  } catch (error) {
-    console.error(`Failed to create task`, error);
-
+  } catch (err) {
+    console.error("Failed to update task", err);
     throw new Error("An error occurred while updating the task.");
   }
 }
 
-export async function deleteTodo(id: number) {
+export async function deleteTask(id: number) {
   try {
     await authClient.request(deleteItem("tasks", id));
-  } catch (error) {
-    console.error(`Failed to delete task`, error);
-
+  } catch (err) {
+    console.error("Failed to delete task", err);
     throw new Error("An error occurred while deleting the task.");
   }
 }
