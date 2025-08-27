@@ -1,5 +1,4 @@
 import { Form, redirect, useActionData } from "react-router";
-import type { Route } from "../+types/root";
 import { login } from "~/.server/auth";
 import { commitSession, getSession, getUserSession } from "~/.server/session";
 import type { AuthenticationData } from "@directus/sdk";
@@ -11,6 +10,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
+import type { Route } from "../+types/home";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { loggedIn, headers } = await getUserSession(request);

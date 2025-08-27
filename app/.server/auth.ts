@@ -12,38 +12,37 @@ interface AuthData {
   password: string;
 }
 
-export const register = async (data: AuthData) => {
-  const { email, password } = data;
+export const register = async ({ email, password }: AuthData) => {
+  try {
+    const users = await client.request(readUsers());
+    const exists = users.some((user) => user.email === email);
 
-  const items = await client.request(readUsers());
-  const alreadyExists = items.some((item) => item.email === email);
+    if (exists) {
+      throw new Error("Email already exists");
+    }
 
-  if (alreadyExists) {
-    throw new Error("Email already exists");
+    await client.request(registerUser(email, password));
+  } catch (error) {
+    console.error("Registration failed:", error);
+    throw error instanceof Error ? error : new Error("Registration failed");
   }
-
-  await client.request(registerUser(email, password));
 };
 
-export const login = async (data: AuthData): Promise<AuthenticationData> => {
-  const { email, password } = data;
-
+export const login = async ({
+  email,
+  password,
+}: AuthData): Promise<AuthenticationData> => {
   authClient.setToken(null);
 
   try {
-    const res = await authClient.request(directusLogin({ email, password }));
-    return res;
+    return await authClient.request(directusLogin({ email, password }));
   } catch (error) {
     if (isDirectusError(error)) {
-      throw new Error(
-        error.errors?.[0]?.message || "Something went wrong with Directus"
-      );
+      throw new Error(error.errors?.[0]?.message || "Directus login error");
     }
-
     if (error instanceof Error) {
       throw new Error(error.message);
     }
-
-    throw new Error("Login Failed");
+    throw new Error("Login failed");
   }
 };
